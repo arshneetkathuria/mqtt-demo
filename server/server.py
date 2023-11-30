@@ -1,47 +1,25 @@
 import paho.mqtt.client as mqtt
 
+# The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
-    print(f"Connected with result code {rc}")
-    if rc == 0:
-        print(f"Is client connected: {client.is_connected()}")
-        print(f"message: {message}, topic: {topic}")
-        # publish message
-        client.publish(topic, message)
-        
-        # subscribe to a topic
-        client.subscribe(topic)
+    print("Connected with result code "+str(rc))
 
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("light")
+
+# The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(f"message: {msg.payload.decode()}, topic: {msg.topic}")
+    print(msg.topic+" "+str(msg.payload))
 
-def on_error(client, userdata, rc):
-    print(f"Error: {rc}")
-    exit(1)
-
-# Define MQTT parameters
-broker_address = "test.mosquitto.org"
-topic = "light"
-message = "test message"
-
-# Create an MQTT client instance
 client = mqtt.Client()
-
-# Assign callbacks
 client.on_connect = on_connect
 client.on_message = on_message
-client.on_error = on_error
 
-# Connect to the broker
-client.connect(broker_address, 1883, 60)
+client.connect("broker.emqx.io", 1883, 60)
 
-# Start the loop
-client.loop_start()
-
-# # Keep the script running
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    print("Disconnected")
-    client.disconnect()
-    client.loop_stop()
+# Blocking call that processes network traffic, dispatches callbacks and
+# handles reconnecting.
+# Other loop*() functions are available that give a threaded interface and a
+# manual interface.
+client.loop_forever()

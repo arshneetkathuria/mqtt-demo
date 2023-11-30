@@ -8,6 +8,7 @@
 
 <script>
 import mqtt from "mqtt";
+import axios from "axios";
 
 export default {
   data() {
@@ -48,10 +49,12 @@ export default {
     this.createConnection();
   },
   methods: {
-    toggleButton() {
+    async toggleButton() {
       this.buttonStatus = !this.buttonStatus;
       this.publish.payload = this.buttonStatus ? "ON" : "OFF";
       this.doPublish();
+      await this.saveStatusToMongoDB(this.publish.payload);
+
     },
     initData() {
       // ... (unchanged)
@@ -111,6 +114,15 @@ export default {
         } catch (error) {
           console.log("Disconnect failed", error.toString());
         }
+      }
+    },
+   async saveStatusToMongoDB(status) {
+      try {
+        // Make HTTP POST request to FastAPI endpoint
+        const response = await axios.post("http://localhost:8000/api/save_status/", { status });
+        console.log(response.data);
+      } catch (error) {
+        console.error("Failed to save status to MongoDB:", error);
       }
     },
   },

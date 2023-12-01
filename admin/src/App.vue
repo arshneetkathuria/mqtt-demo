@@ -53,6 +53,7 @@ export default {
       this.buttonStatus = !this.buttonStatus;
       this.publish.payload = this.buttonStatus ? "ON" : "OFF";
       this.doPublish();
+      console.log('payload',this.publish.payload);
       await this.saveStatusToMongoDB(this.publish.payload);
 
     },
@@ -117,9 +118,10 @@ export default {
       }
     },
    async saveStatusToMongoDB(status) {
+
       try {
         // Make HTTP POST request to FastAPI endpoint
-        const response = await axios.post("http://localhost:8000/api/save_status/", { status });
+        const response = await axios.post(`http://localhost:8000/api/save_status/${status}` );
         console.log(response.data);
       } catch (error) {
         console.error("Failed to save status to MongoDB:", error);

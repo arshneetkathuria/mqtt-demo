@@ -6,6 +6,7 @@
 
 <script>
 import mqtt from "mqtt";
+import axios from "axios";
 
 export default {
   data() {
@@ -66,9 +67,25 @@ export default {
       console.log('Received message:', message);
       this.isOn = message === 'ON';
     },
+
+
+    async fetchInitialStatus() {
+    try {
+      // Make HTTP GET request to FastAPI endpoint to fetch initial status
+      var id="65693c49d79ad6fc00b46051";
+      const response = await axios.get(`http://localhost:8000/api/client/read/${id}`);
+      console.log(response.data,'response');
+      this.isOn = response.data === 'ON';
+    } catch (error) {
+      console.error("Failed to fetch initial status:", error);
+    }
   },
+  },
+  
 
   created() {
+  console.log('first');
+    this.fetchInitialStatus();
     this.createMqttClient();
   },
 
